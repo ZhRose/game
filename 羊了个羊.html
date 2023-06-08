@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    *{
+        box-sizing: border-box;
+    }
+    body{
+        margin: 0;
+    }
+    .main{
+        box-sizing: border-box;
+        position: relative;
+    }
+    .item{
+        border: 1px solid yellowgreen;
+        background: no-repeat center center #fff;
+        position: absolute;
+        background-size: 100%;
+        color:transparent ;
+        display: flex;
+        justify-content: center;
+        align-items:center;
+        z-index: 0;
+        transition: left .3s, top .3s, transform .3s;
+
+    }
+    .item:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            transition: background-color .2s;
+        }
+.disabled:after {
+            
+            background-color: rgba(0,0,0,0.7);
+        }
+        .move-list {
+            border: 1px solid #ddd;
+            background-color: #ddd;
+            margin:0 auto;
+        }
+</style>
+<body>
+<div class="main"></div>
+
+<div class="move-list"></div>
+</body>
+<script>
+        const simpleData = [
+                { name: '虎', color: '#ff1100', bg: './llk/1.png' },
+                { name: '兔', color: '#ff8800', bg: './llk/2.png' },
+                { name: '牛', color: 'green', bg: './llk/3.png' },
+                { name: '羊', color: 'blue', bg: './llk/4.png' },
+                { name: '蛇', color: '#779922', bg: './llk/5.png' },
+                { name: '鼠', color: '#335577', bg: './llk/6.png' }
+            ]
+        
+        const size=40;//每张照片的宽度
+
+        const rows=10;//一列的长度
+
+        const cols=10;//一行的长度
+
+        const oneGoupCount=3;//每组长度
+
+        const group=6;//每个卡片有多少个组
+
+        const cellHtml=[];//表格html
+
+        const layerCount=6;//层数
+
+        //map 修改数据， flat用来遍历获取并合并一个新数组,配合sort随机数打乱（获取数据源）
+        const renderData=Array.from(new Array(oneGoupCount*group)).map(v=>{
+            return simpleData.map(v=>({...v}));
+        }).flat().sort(v=>Math.random()-0.5);
+
+        //绘制出表格矩阵
+        for(let ly=layerCount-1;ly>=0;ly--){//0-5层
+        for(let i=0;i<rows;i++){ //0-9列
+            for(let j=0;j<cols;j++){//0-9行
+                let pyStep = (ly + 1) % 2 === 0 ? size / 2 : 0//当出现0，2，4层不会出现偏移
+                let item=(Math.random()>0.7 && renderData.pop());//模拟随机出现空格
+                item && cellHtml.push(`<div class="item" onclick="move(this)" id="m${ly}-${i}-${j}"
+                    style="width:${size}px;height:${size}px;left:${size * j+pyStep }px;top:${size * i +pyStep}px;background-image:url(${item.bg || ''}">${item.name || ''}</div>`)
+            }   
+          }
+        }
+        const main=document.querySelector(".main");
+        main.innerHTML = cellHtml.reverse().join('')//reverse比较关键
+        main.style.height = `${size * rows + size * 2}px`
+        main.style.width = `${size * cols}px`
+        const moveList = document.querySelector('.move-list')
+        moveList.style.height = `${size}px`
+        moveList.style.width = `${size * 6}px`
+
+
+
+        //计算被遮罩住的底牌
+        const checkDisabled=(items)=>{
+            main.querySelectorAll(".item").forEach((v,i)=>{
+                const arr=v.id.substring(1).split('-').map(v=>Number(v))
+                //2，4，6层偏移(+1)
+                const isPy=(arr[0]+1)%2===0
+                //循环判断盖层的下一层
+                for(let i=arr[0]+1;i<=layerCount-1;i++){
+                    const isPyB=(i+1)%2===0; //判断下层的是否有偏移量相同的层
+                 
+                    if(isPy===isPyB){
+                        const el=main.querySelector(`#m${i}-${arr[1]}-${arr[2]}`)
+                        if(el){
+                            console.log(v);
+                            v.classList.add('disabled')
+                    
+                            break;
+                        }
+                    }else if(isPy && !isPyB){
+                        const result=[
+                            `${i}-${arr[1]}-${arr[2]}`,
+                            `${i}-${arr[1]}-${arr[2] +1}`,
+                            `${i}-${arr[1] + 1}-${arr[2]}`,
+                            `${i}-${arr[1] + 1}-${arr[2] + 1}`].every(k=>{return !main.querySelector('#m'+k)})
+
+                        if(!result){v.classList.add('disabled');break;}
+                        else{v.classList.remove('disabled')}
+                    }else if(!isPy && isPyB){
+                         const result = [
+                            `${i}-${arr[1]}-${arr[2]}`,
+                            `${i}-${arr[1]}-${arr[2] -1}`,
+                            `${i}-${arr[1] -1}-${arr[2]}`,
+                            `${i}-${arr[1] - 1}-${arr[2] - 1}`].every(k => { return !main.querySelector('#m' + k) })
+
+                        if (!result) { v.classList.add('disabled'); break; }
+                        else { v.classList.remove('disabled') }
+                    }
+
+                }
+        
+        
+        })
+
+        }
+       
+        //点击卡片进行消除运算
+        let canMove=true;
+        const move=(me)=>{
+          let  left= moveList.offsetLeft
+          let top=moveList.offsetTop
+          if(!canMove ||me.className.indexOf('disabled')>=0){return}
+          canMove=false;
+
+          //判断moveList是否有东西
+            if(moveList.children.length>0){
+                let ne=moveList.lastElementChild
+                left=ne.offsetLeft+size
+            }
+          me.style.top=`${top}px`
+          me.style.left=`${left}px`
+          me.transitionNamesCount=0;
+          me.ontransitionend=(e)=>{
+          me.transitionNamesCount++
+          if(me.transitionNamesCount===2){
+            moveEnd(me);
+            canMove=true;
+          }
+          }
+          //动画的后续处理  
+          const moveEnd=(me)=>{
+            
+            me.ontransitionend=null;
+            me.setAttribute('onclick','')//取消点击事件
+            moveList.appendChild(me)//添加到子节点用来计数
+            const findResult=[...moveList.children].filter(v=>v.innerHTML===me.innerHTML)//展开并过滤
+            if(findResult.length===3){//如果发现同样的为3个
+                findResult.forEach(v=>{
+                    v.ontransitionend=()=>{moveList.removeChild(v)//消除
+                    ;[...moveList.children].forEach((v,i)=>{
+                        v.style.left=`${i*size+moveList.offsetLeft}px`}
+                        )//重新排位置
+                    }
+                // setTimeout(()=>v.style.transform='scale(0)')
+            })
+            }
+            //设置定时器来判断胜利和失败
+            setTimeout(()=>{if(moveList.children.length==7){
+                alert("哦偶，池子满了"); 
+                return location.reload();
+             }else if(main.children.length==0){
+                alert("呦，不错");
+                return location.reload();}
+            },100)
+            checkDisabled()
+          }
+
+        }
+        checkDisabled()
+      
+
+
+</script>
+</html>
