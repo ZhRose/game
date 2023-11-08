@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>canvas画布</title>
+  </head>
+  <body>
+    <canvas id="c1" width="600" height="400"></canvas>
+    <script>
+      let c1 = document.getElementById("c1");
+      // 获取画笔，上下文对象
+      let ctx = c1.getContext("2d");
+      //绘制图形,绘制矩形fillRect(位置x,位置y,宽度，高度)
+      //填充（x,y,长，宽）
+      //   ctx.fillRect(100, 200, 300, 300);
+      //路径
+      //   ctx.strokeRect(100, 100, 200, 100);
+      //清除
+      //   ctx.clearRect(0, 0, 100, 200);
+      /*画圆形(x,y,半径,开始的角度,结束的角度,逆时针还是顺时针)  顺时针默认为false,逆时针为true
+            每一次都要抬笔放笔
+            ctx.beginPath()
+            ctx.arc(100,200,50,0,Math.PI*2) 
+            ctx.stroke ()
+            ctx.closePath()
+            ctx.beginPath()
+            ctx.arc(75,175,3,0,Math.PI*2)
+            ctx.stroke ()
+            ctx.closePath()
+            ctx.beginPath()
+            ctx.arc(100,200,35,0,Math.PI)
+            ctx.stroke ()
+            ctx.closePath()
+            ctx.beginPath()
+            ctx.arc(125,175,3,0,Math.PI*2)
+            ctx.stroke ()
+            ctx.closePath()
+        */
+      /*通过moveTo来移动笔的位置
+              ctx.beginPath()
+            ctx.arc(100,200,50,0,Math.PI*2) 
+            ctx.moveTo(135,200)
+            ctx.arc(100,200,35,0,Math.PI)
+            ctx.moveTo(78,175)
+            ctx.arc(75,175,3,0,Math.PI*2)
+            ctx.moveTo(128,175)
+            ctx.arc(125,175,3,0,Math.PI*2)
+            ctx.stroke ()
+            ctx.closePath()
+        */
+      /*画线段
+       ctx.beginPath()
+       ctx.moveTo(100,200)
+       ctx.lineTo(150,200)
+       ctx.lineTo(150,250)
+       ctx.lineTo(100,200)
+       ctx.stroke()
+       ctx.closePath()
+       */
+      /*
+       给定两个坐标
+        arcTo(x1,y1,x2,y2,r)
+        ctx.moveTo(150,200)
+        ctx.arcTo(150,250,100,250,40)
+        ctx.stroke()
+      */
+      /*
+        绘制贝塞尔曲线,两个控制点一个终点 
+        爱心路径
+      ctx.beginPath();
+      ctx.moveTo(300,200)
+      ctx.bezierCurveTo(350,150,400,200,300,300);
+      ctx.bezierCurveTo(200,200,250,150,300,200);
+      ctx.stroke();
+      ctx.closePath();
+      */
+      /*
+        cosnt newPath=new Path2D()，对一些已经画过的曲线做封装
+        ctx.strokeStyle='red'轮廓的颜色
+        ctx.fillStyle-'#fff'填充的颜色
+        颜色设置rgb,rgba或者16进制都是可以的
+        ctx.globalAlpha=0.5 设置全局透明度 
+      */
+      /*
+        线性渐变
+     let index=0;
+      function render() {
+        index+=0.01
+        if(index>1){index=0}
+        //  从(0,0)位置到(600,400)位置
+        let linearGradient = ctx.createLinearGradient(0, 0, 600, 400);
+        linearGradient.addColorStop(0, "red");
+        linearGradient.addColorStop(index, "pink");
+        linearGradient.addColorStop(1, "blue");
+        ctx.fillStyle = linearGradient;
+        ctx.fillRect(100, 200, 300, 300);
+        requestAnimationFrame(render)
+      }
+      requestAnimationFrame(render)
+     */
+      /*模拟3d球
+       //第一个圆的位置，半径，第二个圆的位置，半径
+      let radioGradient=ctx.createRadialGradient(250,150,15,300,200,100);
+      radioGradient.addColorStop(0, "pink");
+      radioGradient.addColorStop(1, "red");
+      ctx.fillStyle=radioGradient
+      // ctx.fillRect(0,0,600,400)
+      ctx.arc(300,200,100,0,Math.PI*2)
+      ctx.fill()
+     */
+ 
+    </script>
+  </body>
+</html>
